@@ -1,6 +1,6 @@
 <?php
-require 'conexion.php';
-require 'Producto.php';
+require './utils/ConexionDB.php'; // Asegúrate de que la ruta sea correcta
+require './models/producto.php';
 
 header('Content-Type: application/json');
 
