@@ -9,10 +9,10 @@ class mod_db
 	private $debug = false; // Cambiado a false para mantener la configuración original
 	
 	##### Setting SQL Vars #####
-	protected $sql_host = "localhost";
-	protected $sql_name = "company_info";
-	protected $sql_user = "root";
-	protected $sql_pass = "demo";
+	protected $sql_host = "193.203.166.22";
+	protected $sql_name = "u949375132_ally";
+	protected $sql_user = "u949375132_ally_david";
+	protected $sql_pass = "Monchillo24$";
 
 	public function __construct()
 	{
@@ -210,3 +210,4 @@ public function insertSeguro($tb_name, $data)
 }
 
 $db_con = new mod_db();
+$pdo = $db_con->getConexion();

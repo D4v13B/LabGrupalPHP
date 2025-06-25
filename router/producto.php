@@ -1,7 +1,13 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
-// Obtener método HTTP
+include __DIR__ . '/../utils/ConexionDB.php';
+include __DIR__ . '/../controllers/producto.php';
+
 $method = $_SERVER['REQUEST_METHOD'];
+
 
 switch ($method) {
   case 'GET':
@@ -10,6 +16,7 @@ switch ($method) {
     } else {
       listarProductos($pdo);
     }
+    echo json_encode(["Hola" => "Mundo"]);
     break;
 
   case 'POST':

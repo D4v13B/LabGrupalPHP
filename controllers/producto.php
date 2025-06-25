@@ -1,18 +1,15 @@
 <?php
 
-require "./utils/ConexionDB.php";
-
-
 header('Content-Type: application/json');
 
-$pdo = $db_con->getConexion(); // función definida en conexion.php
-$producto = new Producto($pdo);
-
-
 function listarProductos($pdo) {
-    $stmt = $pdo->query("SELECT * FROM productos");
-    $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    echo json_encode($data);
+    try {
+        $stmt = $pdo->query("SELECT * FROM productos");
+        $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        echo json_encode($data);
+    } catch (PDOException $th) {
+        echo $th->getMessage();
+    }
 }
 
 function obtenerProducto($pdo, $id) {
