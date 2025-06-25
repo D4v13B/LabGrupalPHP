@@ -16,7 +16,6 @@ class mod_db
 
 	public function __construct()
 	{
-		
 	
 	$dsn = "mysql:host=$this->sql_host;
 	dbname=$this->sql_name;charset=utf8mb4";
@@ -138,7 +137,7 @@ public function insertSeguro($tb_name, $data)
 		if ($astriction) {
 			$sql .= " WHERE $astriction"; // Agrega la restricción si existe
 		}
-		$this->executeQuery($sql);
+		$this->conexion->exec($sql);
 	}
 
 
@@ -168,7 +167,7 @@ public function insertSeguro($tb_name, $data)
 	public function nums($string = "", $stmt = null)
 	{
 		if ($string) {
-			$stmt = $this->executeQuery($string);
+			$stmt = $this->conexion->exec($string);
 		}
 		$this->total = $stmt ? $stmt->rowCount() : 0; // Cuenta el número de filas
 		return $this->total;
@@ -177,7 +176,7 @@ public function insertSeguro($tb_name, $data)
 	public function objects($string = "", $where ="")
 	{
 		if ($string) {
-			$stmt = $this->executeQuery($string);
+			$stmt = $this->conexion->prepare($string);
 		}
 		return $stmt ? $stmt->fetch(PDO::FETCH_OBJ) : null; // Retorna un objeto
 	}
@@ -205,7 +204,9 @@ public function insertSeguro($tb_name, $data)
 
 	public function insert_id()
 	{
-		return $this->Conexion->lastInsertId(); // Retorna el último ID insertado
+		return $this->conexion->lastInsertId(); // Retorna el último ID insertado
 	}
 	
 }
+
+$db_con = new mod_db();
