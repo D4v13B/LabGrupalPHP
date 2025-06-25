@@ -16,7 +16,6 @@ switch ($method) {
     } else {
       listarProductos($pdo);
     }
-    echo json_encode(["Hola" => "Mundo"]);
     break;
 
   case 'POST':

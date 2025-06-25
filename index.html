@@ -339,6 +339,16 @@
                   required
                 />
               </div>
+              <div class="form-group">
+                <label for="precio">Precio</label>
+                <input
+                  type="number"
+                  id="precio"
+                  name="precio"
+                  min="0"
+                  required
+                />
+              </div>
             </div>
             <button type="submit" class="btn">Registrar Producto</button>
           </form>
@@ -375,6 +385,7 @@
                   <th>Código</th>
                   <th>Producto</th>
                   <th>Cantidad</th>
+                  <th>Precio</th>
                 </tr>
               </thead>
               <tbody id="productTableBody">
@@ -393,6 +404,15 @@
     <script>
       let products = [];
       let nextId = 1;
+
+      function displayAlert({ title, text, icon }) {
+        Swal.fire({
+          title,
+          text,
+          icon,
+          confirmButtonText: "Cool",
+        });
+      }
 
       function showAlert(message, type = "success") {
         const alertsContainer = document.getElementById("alerts");
@@ -435,6 +455,7 @@
                     <td><strong>${product.codigo}</strong></td>
                     <td>${product.producto}</td>
                     <td><span style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 5px 15px; border-radius: 20px; font-weight: 600;">${product.cantidad}</span></td>
+                    <td>${product.precio}</td>
                 </tr>
             `
           )
@@ -514,12 +535,58 @@
           searchProducts(this.value);
         });
 
-      // Datos de ejemplo para mostrar la funcionalidad
-      addProduct("PROD001", "Laptop Dell XPS 13", 5);
-      addProduct("PROD002", "Mouse Logitech MX Master", 15);
-      addProduct("PROD003", "Teclado Mecánico Corsair", 8);
-      addProduct("PROD004", 'Monitor Samsung 24"', 3);
-      addProduct("PROD005", "Auriculares Sony WH-1000XM4", 12);
+      function fetchProductos() {
+        fetch("http://localhost/LabPHPGrupal/router/producto.php")
+          .then((response) => response.json())
+          .then((data) => {
+            // Adaptar los nombres de las propiedades al formato usado en el frontend
+            products = data.map((item, idx) => ({
+              id: item.id,
+              codigo: item.Codigo,
+              producto: item.Producto,
+              cantidad: item.Cantidad,
+              precio: item.Precio
+            }));
+            // Actualizar el contador de IDs para evitar duplicados al agregar nuevos productos
+            nextId =
+              products.length > 0
+                ? Math.max(...products.map((p) => p.id)) + 1
+                : 1;
+            renderProducts();
+            updateStats();
+            showAlert("Productos cargados desde el servidor", "success");
+          })
+          .catch((error) => {
+            showAlert("Error al cargar productos del servidor", "error");
+            console.error(error);
+          });
+      }
+
+      function registrarProductoBackend(codigo, producto, cantidad, precio) {
+        fetch("http://localhost/LabPHPGrupal/router/producto.php", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            Codigo: codigo,
+            Producto: producto,
+            Cantidad: cantidad,
+            Precio: precio
+          }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            showAlert("Producto registrado en el servidor", "success");
+            fetchProductos(); // Recargar la lista desde el backend
+          })
+          .catch((error) => {
+            showAlert("Error al registrar producto en el servidor", "error");
+            console.error(error);
+          });
+      }
+
+      fetchProductos();
     </script>
   </body>
 </html>
