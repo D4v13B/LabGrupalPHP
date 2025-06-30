@@ -6,30 +6,32 @@ error_reporting(E_ALL);
 include __DIR__ . '/../utils/ConexionDB.php';
 include __DIR__ . '/../controllers/producto.php';
 
-$method = $_SERVER['REQUEST_METHOD'];
+// $pdo = ConexionDB::getConnection();
+$controller = new ProductoController($pdo);
 
+$method = $_SERVER['REQUEST_METHOD'];
 
 switch ($method) {
   case 'GET':
     if (isset($_GET['id'])) {
-      obtenerProducto($pdo, $_GET['id']);
+      $controller->obtener($_GET['id']);
     } else {
-      listarProductos($pdo);
+      $controller->listar();
     }
     break;
 
   case 'POST':
-    crearProducto($pdo);
+    $controller->crear();
     break;
 
   case 'PUT':
-    parse_str(file_get_contents("php://input"), $_PUT);
-    actualizarProducto($pdo, $_PUT);
+    $data = json_decode(file_get_contents("php://input"), true);
+    $controller->actualizar($data);
     break;
 
   case 'DELETE':
-    parse_str(file_get_contents("php://input"), $_DELETE);
-    eliminarProducto($pdo, $_DELETE['id'] ?? null);
+    $data = json_decode(file_get_contents("php://input"), true);
+    $controller->eliminar($data['id'] ?? null);
     break;
 
   default:

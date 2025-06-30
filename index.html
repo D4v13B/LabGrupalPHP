@@ -354,6 +354,39 @@
           </form>
         </div>
 
+        <div class="section" id="editSection" style="display: none">
+          <h2>✏️ Editar Producto</h2>
+          <form id="editForm">
+            <input type="hidden" id="editId" />
+            <div class="form-row">
+              <div class="form-group">
+                <label for="editCodigo">Código del Producto</label>
+                <input type="text" id="editCodigo" required />
+              </div>
+              <div class="form-group">
+                <label for="editProducto">Nombre del Producto</label>
+                <input type="text" id="editProducto" required />
+              </div>
+              <div class="form-group">
+                <label for="editCantidad">Cantidad</label>
+                <input type="number" id="editCantidad" min="0" required />
+              </div>
+              <div class="form-group">
+                <label for="editPrecio">Precio</label>
+                <input type="number" id="editPrecio" min="0" required />
+              </div>
+            </div>
+            <button type="submit" class="btn">Guardar Cambios</button>
+            <button
+              type="button"
+              class="btn btn-secondary"
+              onclick="cancelEdit()"
+            >
+              Cancelar
+            </button>
+          </form>
+        </div>
+
         <div class="section">
           <h2>🔍 Buscar Productos</h2>
           <div class="search-container">
@@ -386,6 +419,7 @@
                   <th>Producto</th>
                   <th>Cantidad</th>
                   <th>Precio</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody id="productTableBody">
@@ -450,19 +484,21 @@
         tbody.innerHTML = productsToShow
           .map(
             (product) => `
-                <tr>
-                    <td>${product.id}</td>
-                    <td><strong>${product.codigo}</strong></td>
-                    <td>${product.producto}</td>
-                    <td><span style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 5px 15px; border-radius: 20px; font-weight: 600;">${product.cantidad}</span></td>
-                    <td>${product.precio}</td>
-                </tr>
-            `
+        <tr>
+            <td>${product.id}</td>
+            <td><strong>${product.codigo}</strong></td>
+            <td>${product.producto}</td>
+            <td><span style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 5px 15px; border-radius: 20px; font-weight: 600;">${product.cantidad}</span></td>
+            <td>${product.precio}</td>
+            <td>
+              <button class="btn btn-secondary" onclick="fillEditForm(${product.id})">Editar</button>
+            </td>
+        </tr>`
           )
           .join("");
       }
 
-      function addProduct(codigo, producto, cantidad) {
+      function addProduct(codigo, producto, cantidad, precio) {
         const existingProduct = products.find(
           (p) => p.codigo.toLowerCase() === codigo.toLowerCase()
         );
@@ -477,7 +513,10 @@
           codigo: codigo,
           producto: producto,
           cantidad: parseInt(cantidad),
+          precio,
         };
+
+        registrarProductoBackend(codigo, producto, cantidad, precio);
 
         products.push(newProduct);
         renderProducts();
@@ -523,8 +562,9 @@
           const codigo = document.getElementById("codigo").value.trim();
           const producto = document.getElementById("producto").value.trim();
           const cantidad = document.getElementById("cantidad").value;
+          const precio = document.getElementById("precio").value;
 
-          if (addProduct(codigo, producto, cantidad)) {
+          if (addProduct(codigo, producto, cantidad, precio)) {
             this.reset();
           }
         });
@@ -545,7 +585,7 @@
               codigo: item.Codigo,
               producto: item.Producto,
               cantidad: item.Cantidad,
-              precio: item.Precio
+              precio: item.Precio,
             }));
             // Actualizar el contador de IDs para evitar duplicados al agregar nuevos productos
             nextId =
@@ -572,7 +612,7 @@
             Codigo: codigo,
             Producto: producto,
             Cantidad: cantidad,
-            Precio: precio
+            Precio: precio,
           }),
         })
           .then((response) => response.json())
@@ -587,6 +627,65 @@
       }
 
       fetchProductos();
+
+      //Editar formulario --------------
+      function fillEditForm(id) {
+        const product = products.find((p) => p.id === id);
+        if (!product) return;
+
+        document.getElementById("editId").value = product.id;
+        document.getElementById("editCodigo").value = product.codigo;
+        document.getElementById("editProducto").value = product.producto;
+        document.getElementById("editCantidad").value = product.cantidad;
+        document.getElementById("editPrecio").value = product.precio;
+
+        document.getElementById("editSection").style.display = "block";
+        window.scrollTo(0, 0);
+      }
+
+      function cancelEdit() {
+        document.getElementById("editSection").style.display = "none";
+      }
+
+      document
+        .getElementById("editForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+
+          const id = document.getElementById("editId").value;
+          const codigo = document.getElementById("editCodigo").value.trim();
+          const producto = document.getElementById("editProducto").value.trim();
+          const cantidad = document.getElementById("editCantidad").value;
+          const precio = document.getElementById("editPrecio").value;
+
+          editarProductoBackend(id, codigo, producto, cantidad, precio);
+        });
+
+      function editarProductoBackend(id, codigo, producto, cantidad, precio) {
+        fetch("http://localhost/LabPHPGrupal/router/producto.php", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            id: id,
+            Codigo: codigo,
+            Producto: producto,
+            Cantidad: cantidad,
+            Precio: precio,
+          }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            showAlert("Producto editado correctamente", "success");
+            document.getElementById("editSection").style.display = "none";
+            fetchProductos();
+          })
+          .catch((error) => {
+            showAlert("Error al editar producto", "error");
+            console.error(error);
+          });
+      }
     </script>
   </body>
 </html>
