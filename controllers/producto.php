@@ -39,13 +39,23 @@ class ProductoController
     
         if ($stmt->rowCount() > 0) {
             // Ya existe otro producto con ese código (distinto ID)
+            http_response_code(401);
             echo json_encode([
                 "success" => false,
                 "error" => "El código ya está en uso por otro producto."
             ]);
             return;
-        
         }
+
+        $data = json_decode(file_get_contents("php://input"), true);
+        $stmt = $this->pdo->prepare("INSERT INTO productos (Codigo, Producto, Precio, Cantidad) VALUES (?, ?, ?, ?)");
+        $success = $stmt->execute([
+            $data['Codigo'],
+            $data['Producto'],
+            $data['Precio'],
+            $data['Cantidad']
+        ]);
+        echo json_encode(["success" => $success]);
     }
 
     public function actualizar($data)
